@@ -14,6 +14,11 @@ function App() {
   const titleInputRef = useRef(null)
   const hiddenPdfRef = useRef(null)
   const previewRef = useRef(null)
+  const [editorWidth, setEditorWidth] = useState(50) // percent
+  const containerRef = useRef(null)
+  const isDragging = useRef(false)
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark')
+  const [isPreviewFullScreen, setIsPreviewFullScreen] = useState(false)
 
   // Load documents from localStorage on app start
   useEffect(() => {
@@ -81,6 +86,10 @@ Type your markdown on the left and see it rendered on the right.`,
       titleInputRef.current.select()
     }
   }, [isEditingTitle])
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme)
+  }, [theme])
 
   const createNewDocument = () => {
     const newDoc = {
@@ -196,10 +205,46 @@ Type your markdown on the left and see it rendered on the right.`,
 
   const currentDoc = documents.find(d => d.id === currentDocId)
 
+  const startDrag = (e) => {
+    isDragging.current = true
+    document.body.style.cursor = 'col-resize'
+  }
+  const stopDrag = () => {
+    isDragging.current = false
+    document.body.style.cursor = ''
+  }
+  const onDrag = (e) => {
+    if (!isDragging.current || !containerRef.current) return
+    const containerRect = containerRef.current.getBoundingClientRect()
+    const x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX
+    let newWidth = ((x - containerRect.left) / containerRect.width) * 100
+    newWidth = Math.max(15, Math.min(85, newWidth))
+    setEditorWidth(newWidth)
+  }
+  useEffect(() => {
+    window.addEventListener('mousemove', onDrag)
+    window.addEventListener('mouseup', stopDrag)
+    window.addEventListener('touchmove', onDrag)
+    window.addEventListener('touchend', stopDrag)
+    return () => {
+      window.removeEventListener('mousemove', onDrag)
+      window.removeEventListener('mouseup', stopDrag)
+      window.removeEventListener('touchmove', onDrag)
+      window.removeEventListener('touchend', stopDrag)
+    }
+  }, [])
+
+  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark')
+
   return (
-    <div className="app">
+    <div className={`app ${theme}-mode${isPreviewFullScreen ? ' preview-fullscreen' : ''}`}>
       <header className="header">
-        <h1>Markdown Editor</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h1>Markdown Editor</h1>
+          <button className="btn btn-secondary theme-toggle-btn" onClick={toggleTheme} title="Toggle light/dark mode">
+            {theme === 'dark' ? '🌞' : '🌙'}
+          </button>
+        </div>
         <div className="header-controls">
           <button 
             className="btn btn-primary"
@@ -214,7 +259,7 @@ Type your markdown on the left and see it rendered on the right.`,
             📁 Files
           </button>
           <label className="btn btn-secondary">
-            📂 Import MD
+            ⬆️ Import MD
             <input
               type="file"
               accept=".md,.markdown"
@@ -227,7 +272,7 @@ Type your markdown on the left and see it rendered on the right.`,
             onClick={exportDocument}
             disabled={!currentDoc}
           >
-            💾 Export as MD
+            📄 Export as MD
           </button>
           <button
             className="btn btn-secondary"
@@ -279,8 +324,8 @@ Type your markdown on the left and see it rendered on the right.`,
         </div>
       )}
       
-      <div className="editor-container">
-        <div className="editor-panel">
+      <div className="editor-container" ref={containerRef}>
+        <div className="editor-panel" style={{ width: isPreviewFullScreen ? '0' : `${editorWidth}%`, display: isPreviewFullScreen ? 'none' : 'flex' }}>
           <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {isEditingTitle && currentDoc ? (
               <input
@@ -320,9 +365,35 @@ Type your markdown on the left and see it rendered on the right.`,
             className="markdown-input"
           />
         </div>
-        
-        <div className="preview-panel" ref={previewRef}>
-          <h2>Preview</h2>
+        <div
+          className="drag-divider"
+          onMouseDown={startDrag}
+          onTouchStart={startDrag}
+          style={{ cursor: 'col-resize', width: '8px', background: 'transparent', zIndex: 2, display: isPreviewFullScreen ? 'none' : 'block' }}
+        />
+        <div className={`preview-panel${isPreviewFullScreen ? ' fullscreen' : ''}`} ref={previewRef} style={{ width: isPreviewFullScreen ? '100%' : `${100 - editorWidth}%`, zIndex: isPreviewFullScreen ? 1000 : 'auto', position: isPreviewFullScreen ? 'fixed' : 'relative', top: isPreviewFullScreen ? 0 : 'auto', left: isPreviewFullScreen ? 0 : 'auto', height: isPreviewFullScreen ? '100vh' : '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h2>Preview</h2>
+            {!isPreviewFullScreen && (
+              <button
+                className="btn btn-secondary preview-fullscreen-btn"
+                onClick={() => setIsPreviewFullScreen(true)}
+                title="View Full Screen"
+                style={{ marginLeft: 'auto' }}
+              >
+                ⛶
+              </button>
+            )}
+          </div>
+          {isPreviewFullScreen && (
+            <button
+              className="preview-exit-fullscreen-btn"
+              onClick={() => setIsPreviewFullScreen(false)}
+              title="Exit Full Screen"
+            >
+              ⨉
+            </button>
+          )}
           <div className="markdown-preview">
             <ReactMarkdown>{markdown}</ReactMarkdown>
           </div>
