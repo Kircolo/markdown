@@ -10,14 +10,14 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f5f5;
+  background-color: #151922;
 }
 
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f5f5f5;
+  background: #151922;
 }
 
 .header {
@@ -33,7 +33,7 @@ body {
 
 .header h1 {
   font-size: 1.45rem;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.5rem;
   font-weight: 700;
   letter-spacing: 0.5px;
   background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
@@ -43,13 +43,158 @@ body {
   text-fill-color: transparent;
 }
 
-.header p {
-  font-size: 0.98rem;
-  opacity: 0.85;
-  font-weight: 400;
-  letter-spacing: 0.2px;
-  margin-bottom: 0;
+.header-controls {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #23273a;
+  color: #eaf6ff;
+  border: 1px solid #2d3748;
+}
+
+.btn:hover {
+  background: #2d3748;
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0072ff 0%, #00c6ff 100%);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0056cc 0%, #0099cc 100%);
+}
+
+.btn-secondary {
+  background: #23273a;
+  color: #eaf6ff;
+  border: 1px solid #2d3748;
+}
+
+.btn-secondary:hover {
+  background: #2d3748;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.btn-small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.file-manager {
+  background: #1a1e29;
+  margin: 0 2rem 1rem 2rem;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #23273a;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.13);
+}
+
+.file-manager h3 {
   color: #b3cfff;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.document-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.document-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #181c24;
+  border-radius: 8px;
+  border: 1px solid #23273a;
+  transition: all 0.2s ease;
+}
+
+.document-item:hover {
+  background: #23243a;
+  border-color: #2d3748;
+}
+
+.document-item.active {
+  border-color: #0072ff;
+  background: #1a2233;
+}
+
+.document-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.document-title-input {
+  background: transparent;
+  border: none;
+  color: #eaf6ff;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.25rem 0;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.document-title-input:focus {
+  outline: none;
+  background: #23243a;
+  padding: 0.25rem 0.5rem;
+}
+
+.document-date {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.document-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.save-status {
+  font-size: 0.8rem;
+  color: #10b981;
+  margin-left: 0.5rem;
+  font-weight: 400;
 }
 
 .editor-container {
@@ -66,46 +211,50 @@ body {
 .preview-panel {
   flex: 1 1 0;
   min-width: 0;
-  background: white;
+  background: #1a1e29;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.13);
   display: flex;
   flex-direction: column;
   height: 70vh;
+  border: 1px solid #23273a;
 }
 
 .editor-panel h2,
 .preview-panel h2 {
-  background: #f8f9fa;
+  background: #181c24;
   padding: 1rem 1.5rem;
   margin: 0;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid #23273a;
   font-size: 1.2rem;
   font-weight: 600;
-  color: #495057;
+  color: #b3cfff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .markdown-input {
   width: 100%;
   flex: 1;
-  border: 1.5px solid #bdbdbd;
+  border: 1.5px solid #23273a;
   outline: none;
   padding: 1.5rem;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 1.15rem;
   line-height: 1.7;
   resize: none;
-  background: #f9f9fb;
-  color: #222;
+  background: #181c24;
+  color: #eaf6ff;
   border-radius: 0 0 12px 12px;
   transition: border 0.2s, background 0.2s;
   scrollbar-width: thin;
-  scrollbar-color: #e0e0e0 #f9f9fb;
+  scrollbar-color: #23273a #181c24;
 }
 
 .markdown-input:focus {
-  background: #fff;
-  border: 2px solid #e52e71;
+  background: #23243a;
+  border: 2px solid #0072ff;
 }
 
 .markdown-preview {
@@ -113,11 +262,11 @@ body {
   padding: 1.5rem;
   overflow-y: auto;
   line-height: 1.7;
-  color: #222;
-  background: #fcfcfd;
+  color: #eaf6ff;
+  background: #181c24;
   border-radius: 0 0 12px 12px;
   scrollbar-width: thin;
-  scrollbar-color: #e0e0e0 #fcfcfd;
+  scrollbar-color: #23273a #181c24;
 }
 
 /* Custom Scrollbar Styles for Webkit Browsers */
@@ -129,7 +278,7 @@ body {
 
 .markdown-input::-webkit-scrollbar-thumb,
 .markdown-preview::-webkit-scrollbar-thumb {
-  background: #e0e0e0;
+  background: #23273a;
   border-radius: 6px;
   opacity: 0.3;
   transition: background 0.2s;
@@ -137,7 +286,7 @@ body {
 
 .markdown-input:hover::-webkit-scrollbar-thumb,
 .markdown-preview:hover::-webkit-scrollbar-thumb {
-  background: #bdbdbd;
+  background: #0072ff;
 }
 
 .markdown-input::-webkit-scrollbar-track,
@@ -149,15 +298,15 @@ body {
 .markdown-preview h1 {
   font-size: 2rem;
   margin-bottom: 1rem;
-  color: #2c3e50;
-  border-bottom: 2px solid #e52e71;
+  color: #4fc3f7;
+  border-bottom: 2px solid #0072ff;
   padding-bottom: 0.5rem;
 }
 
 .markdown-preview h2 {
   font-size: 1.5rem;
   margin: 1.5rem 0 1rem 0;
-  color: #34495e;
+  color: #90caf9;
   background: none;
   border: none;
   padding: 0;
@@ -166,12 +315,12 @@ body {
 .markdown-preview h3 {
   font-size: 1.25rem;
   margin: 1.25rem 0 0.75rem 0;
-  color: #2c3e50;
+  color: #b3cfff;
 }
 
 .markdown-preview p {
   margin-bottom: 1rem;
-  color: #2c3e50;
+  color: #eaf6ff;
 }
 
 .markdown-preview ul,
@@ -182,21 +331,21 @@ body {
 
 .markdown-preview li {
   margin-bottom: 0.5rem;
-  color: #2c3e50;
+  color: #eaf6ff;
 }
 
 .markdown-preview code {
-  background: #f8f9fa;
+  background: #23243a;
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 0.98em;
-  color: #e74c3c;
+  color: #4fc3f7;
 }
 
 .markdown-preview pre {
-  background: #2c3e50;
-  color: #ecf0f1;
+  background: #10131a;
+  color: #eaf6ff;
   padding: 1rem;
   border-radius: 8px;
   overflow-x: auto;
@@ -210,25 +359,44 @@ body {
 }
 
 .markdown-preview blockquote {
-  border-left: 4px solid #e52e71;
+  border-left: 4px solid #0072ff;
   padding-left: 1rem;
   margin: 1rem 0;
-  color: #7f8c8d;
+  color: #b3cfff;
   font-style: italic;
 }
 
 .markdown-preview strong {
   font-weight: 600;
-  color: #2c3e50;
+  color: #eaf6ff;
 }
 
 .markdown-preview em {
   font-style: italic;
-  color: #2c3e50;
+  color: #b3cfff;
 }
 
 /* Responsive Design */
 @media (max-width: 900px) {
+  .header-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .file-manager {
+    margin: 0 1rem 1rem 1rem;
+  }
+  
+  .document-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .document-actions {
+    justify-content: center;
+  }
+  
   .editor-container {
     flex-direction: column;
     padding: 1rem;
