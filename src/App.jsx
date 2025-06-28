@@ -1,12 +1,19 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import './App.css'
+import MarkdownIt from 'markdown-it'
+import jsPDF from 'jspdf'
+import html2pdf from 'html2pdf.js'
 
 function App() {
   const [documents, setDocuments] = useState([])
   const [currentDocId, setCurrentDocId] = useState(null)
   const [markdown, setMarkdown] = useState('')
   const [showFileManager, setShowFileManager] = useState(false)
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const titleInputRef = useRef(null)
+  const hiddenPdfRef = useRef(null)
+  const previewRef = useRef(null)
 
   // Load documents from localStorage on app start
   useEffect(() => {
@@ -67,6 +74,13 @@ Type your markdown on the left and see it rendered on the right.`,
       ))
     }
   }, [markdown, currentDocId])
+
+  useEffect(() => {
+    if (isEditingTitle && titleInputRef.current) {
+      titleInputRef.current.focus()
+      titleInputRef.current.select()
+    }
+  }, [isEditingTitle])
 
   const createNewDocument = () => {
     const newDoc = {
@@ -131,6 +145,33 @@ Type your markdown on the left and see it rendered on the right.`,
     URL.revokeObjectURL(url)
   }
 
+  const exportPDF = () => {
+    const currentDoc = documents.find(d => d.id === currentDocId)
+    if (!currentDoc || !previewRef.current) return
+    // Save original styles
+    const previewEl = previewRef.current
+    const originalHeight = previewEl.style.height
+    const originalOverflow = previewEl.style.overflow
+    // Expand preview to fit all content
+    previewEl.style.height = 'auto'
+    previewEl.style.overflow = 'visible'
+    // Wait for DOM to update, then export
+    setTimeout(() => {
+      const opt = {
+        margin:       0.5,
+        filename:     `${currentDoc.title}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+      }
+      html2pdf().set(opt).from(previewEl).save().then(() => {
+        // Restore original styles
+        previewEl.style.height = originalHeight
+        previewEl.style.overflow = originalOverflow
+      })
+    }, 100)
+  }
+
   const importDocument = (event) => {
     const file = event.target.files[0]
     if (!file) return
@@ -161,12 +202,6 @@ Type your markdown on the left and see it rendered on the right.`,
         <h1>Markdown Editor</h1>
         <div className="header-controls">
           <button 
-            className="btn btn-secondary"
-            onClick={() => setShowFileManager(!showFileManager)}
-          >
-            📁 Files
-          </button>
-          <button 
             className="btn btn-primary"
             onClick={createNewDocument}
           >
@@ -174,13 +209,12 @@ Type your markdown on the left and see it rendered on the right.`,
           </button>
           <button 
             className="btn btn-secondary"
-            onClick={exportDocument}
-            disabled={!currentDoc}
+            onClick={() => setShowFileManager(!showFileManager)}
           >
-            💾 Export
+            📁 Files
           </button>
           <label className="btn btn-secondary">
-            📂 Import
+            📂 Import MD
             <input
               type="file"
               accept=".md,.markdown"
@@ -188,6 +222,20 @@ Type your markdown on the left and see it rendered on the right.`,
               style={{ display: 'none' }}
             />
           </label>
+          <button 
+            className="btn btn-secondary"
+            onClick={exportDocument}
+            disabled={!currentDoc}
+          >
+            💾 Export as MD
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={exportPDF}
+            disabled={!currentDoc}
+          >
+            🖨️ Export as PDF
+          </button>
         </div>
       </header>
 
@@ -233,8 +281,32 @@ Type your markdown on the left and see it rendered on the right.`,
       
       <div className="editor-container">
         <div className="editor-panel">
-          <h2>
-            {currentDoc ? currentDoc.title : 'Markdown Input'}
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {isEditingTitle && currentDoc ? (
+              <input
+                ref={titleInputRef}
+                type="text"
+                value={currentDoc.title}
+                onChange={e => updateDocumentTitle(currentDoc.id, e.target.value)}
+                onBlur={() => setIsEditingTitle(false)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') setIsEditingTitle(false)
+                }}
+                className="document-title-input inline-title-input"
+                style={{ fontSize: '1.1rem', fontWeight: 600, maxWidth: '300px' }}
+              />
+            ) : (
+              <span
+                className="inline-title-text"
+                tabIndex={0}
+                onClick={() => setIsEditingTitle(true)}
+                onKeyDown={e => { if (e.key === 'Enter') setIsEditingTitle(true) }}
+                style={{ cursor: 'pointer', fontWeight: 600 }}
+                title="Click to edit title"
+              >
+                {currentDoc ? currentDoc.title : 'Markdown Input'}
+              </span>
+            )}
             {currentDoc && (
               <span className="save-status">
                 💾 Auto-saved
@@ -249,7 +321,7 @@ Type your markdown on the left and see it rendered on the right.`,
           />
         </div>
         
-        <div className="preview-panel">
+        <div className="preview-panel" ref={previewRef}>
           <h2>Preview</h2>
           <div className="markdown-preview">
             <ReactMarkdown>{markdown}</ReactMarkdown>
